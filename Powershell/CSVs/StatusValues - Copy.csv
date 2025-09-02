@@ -1,0 +1,9 @@
+Status,Visibility
+With Authorising Manager 1,A1
+With Authorising Manager 2,A2
+Sent back by Authoriser 1 with comments,LM
+With People Ops for approval,HR
+Sent back by Authoriser 2 with comments,LM
+Sent back by People Ops,LM
+Declined by People Ops,HR
+Processed by People Ops,LM
