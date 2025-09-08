@@ -23,8 +23,8 @@ $CsvPath = "$PSScriptRoot\CSVs";
 $listNameAuthorisations = "FrontDoor"
 $listUrlAuthorisations = "Lists/FrontDoor"
 
-$listNameComments = "NatureOfRequest"
-$listUrlComments = "Lists/NatureOfRequest"
+$listNameNatureOfRequest = "NatureOfRequest"
+$listUrlNatureOfRequest = "Lists/NatureOfRequest"
 
 $listNameDesiredOutcome = "DesiredOutcome"
 $listUrlDesiredOutcome = "Lists/DesiredOutcome"
@@ -661,32 +661,7 @@ Function New-FrontDoorList($ListName, $ListUrl, $Connection)
         Remove-PnPList -Identity $ListName -Force
     }
     New-PnPList -Title $ListName             -Url $ListUrl             -Template $Template -ErrorAction Stop
-    #NewStarters - Employee details
-    #cannot create a field with Internal name Title as field already exists.
-    #Set-PnPField -List $ListName -Identity Title -Values @{Required = $false; "Title" = "Old_Title" }second
-<#
-    $changeTypeList = 
-    "Change To Job Title", "Change To Job Level", "Change Of Line Manager", "Contract Extension (Of Existing Contract)"                                         `
-    , "Change Of Salary", "Change Of Name", "Secondment (Don't appear for 'Only Shops/Stores')", "End of Secondment (Don't appear for 'Only Shops/Stores')"     `
-    , "End Of Temporary Change", "Permanent Promotion", "Additional Responsibility Allowance (Don't appear for 'Only Shops/Stores')"                            `
-    , "Compensation Change/Benchmarking", "Change to Cost Centre", "Change to Working Style and/or Office Location"                                             `
-    , "Temporary Promotion (Only appear for 'Only Shops/Stores')", "End of Temporary Promotion (Only appear for 'Only Shops/Stores')";
-#>
-
-
-    #
-    # Change Type Fields
-
-   
-
-
-    #Add-BHFChoiceField -List $ListName -InternalName 'WorkerTypeChoice' -DisplayName 'WorkerTypeChoice'     `
-    #-Required -AddToDefaultView                                                                         `
-    #-Choices "Fixed Term Employee", "Volunteer", "Permanent Employee", "Contractor/Contingent Worker"   `
-    
-    
-
-    # The Data Subject
+  
     $field = Add-PnPField -List $ListName -InternalName 'RequestorName' -DisplayName 'RequestorName' -Type User -Required
     Set-PnPField -List $ListName -Identity $field.Id -Values @{"SelectionMode" = 0}  #People only.  Not groups.
     
@@ -694,10 +669,15 @@ Function New-FrontDoorList($ListName, $ListUrl, $Connection)
 	    Add-PnPField -List $ListName -InternalName 'AreaOfImpact' -DisplayName 'AreaOfImpact' -Type Text -AddToDefaultView -Required
   	    Add-PnPField -List $ListName -InternalName 'NatureOfRequest' -DisplayName 'NatureOfRequest' -Type Text -AddToDefaultView -Required   
 	    Add-PnPField -List $ListName -InternalName 'RequestOutline' -DisplayName 'RequestOutline' -Type Text -AddToDefaultView -Required   
-        Add-PnPField -List $ListName -InternalName  'RequestDescription' -DisplayName 'RequestDescription' -Type Note -AddToDefaultView  -Required
+		
+		
+$RequestDescriptionXml = "<Field Type='Note' Name='RequestDescription' ID='$([GUID]::NewGuid())' DisplayName='RequestDescription' Required ='TRUE' RichText='TRUE' RichTextMode='FullHtml' ></Field>"  
+		Add-PnPFieldFromXml -List $ListName -FieldXml $RequestDescriptionXml
+		
+        #Add-PnPField -List $ListName -InternalName  'RequestDescription' -DisplayName 'RequestDescription' -Type Note -AddToDefaultView  -Required
 Add-PnPField -List $ListName -InternalName 'TestingSignoff' -DisplayName 'TestingSignoff' -Type User -Required
 
-    Add-PnPField -List $ListName -Type Boolean -AddToDefaultView -InternalName 'ThisARegulatoryRequirement' -DisplayName 'ThisARegulatoryRequirement'  -Required
+    Add-PnPField -List $ListName -Type Text -AddToDefaultView -InternalName 'IsThisARegulatoryRequirement' -DisplayName 'IsThisARegulatoryRequirement'  -Required
 	
 	Add-PnPField -List $ListName -InternalName 'DesiredOutcome' -DisplayName 'DesiredOutcome' -Type Text -AddToDefaultView -Required
 Add-PnPField -List $ListName -InternalName 'Urgency' -DisplayName 'Urgency' -Type Text -AddToDefaultView -Required
@@ -707,7 +687,7 @@ Add-PnPField -List $ListName -InternalName 'Urgency' -DisplayName 'Urgency' -Typ
 
     Add-BHFDateTimeField -List $ListName -InternalName 'Deadline' -DisplayName 'Deadline' -DateFormat "DateOnly" -FriendlyDisplayFormat $null -AddToDefaultView 
     #Add-BHFDateTimeField -List $ListName -InternalName 'EndDate' -DisplayName 'EndDate' -DateFormat "DateOnly" -FriendlyDisplayFormat $null -AddToDefaultView
-
+Add-PnPField -List $ListName -InternalName 'JIRATicketId' -DisplayName 'JIRATicketId' -Type Text -AddToDefaultView
 
     
 
@@ -722,33 +702,7 @@ Add-PnPField -List $ListName -InternalName 'Urgency' -DisplayName 'Urgency' -Typ
 }
 
 
-<#
-Function New-StatusValuesList($ListName, $ListUrl, $Connection)
-{
-    $local:dataStatusValuesList = "$($CsvPath)/$($ListName).csv"
-    If(-not (IsListBuildRequired $ListName)) {
-        return;
-    }
-    If ($null -ne (Get-PnPList -Identity $ListName -ErrorAction SilentlyContinue)) {
-        Remove-PnPList -Identity $ListName -Force
-    }
 
-    New-PnPList -Title $ListName -Url $ListUrl -Connection $Connection -Template GenericList
-    Invoke-PnPQuery
-
-    Add-PnPField -List $ListName -InternalName 'Status' -DisplayName 'Status' -Type Text -AddToDefaultView
-	Add-PnPField -List $ListName -InternalName 'Visibility' -DisplayName 'Visibility' -Type Text -AddToDefaultView
-    Hide-TitleField -List $ListName
-    If(Test-Path $dataStatusValuesList) {
-        $statusValueItems = Import-Csv $dataStatusValuesList
-        Write-Host -NoNewline "Loading $ListName"
-        ForEach ($item in $statusValueItems) {
-            Add-PnPListItem -List $ListName -Values @{"Status" = $item.Status;"Visibility" = $item.Visibility;} | Out-Null
-            Write-Host -NoNewLine "."
-        }
-        Write-Host "`n"        
-    }
-}#>
 
 
 Function New-LimitValuesList($ListName, $ListUrl, $Connection)
@@ -871,8 +825,6 @@ Function New-AreaOfImpactList ($ListName, $ListUrl, $Connection)
 
 Function New-UrgencyValues($ListName, $ListUrl, $Connection)
 {
-#    $listNameUrgency = "UrgencyValues"
-#    $listUrlUrgency  = "Lists/$listNameUrgency"
     If (-not (IsListBuildRequired $ListName)) {
         return;
     }
@@ -881,7 +833,7 @@ Function New-UrgencyValues($ListName, $ListUrl, $Connection)
     }
     New-PnPList -Title $ListName -Url $ListUrl -Template GenericList -Connection $connection
     Set-PnPField -List $ListUrl -Identity Title -Values @{ Title = "Old_Title"; Required = $false;}
-    Add-PnPField -List $ListName -InternalName 'UrgencyValue' -DisplayName 'UrgencyValue' -Type Text
+    Add-PnPField -List $ListName -InternalName 'UrgencyValue' -DisplayName 'UrgencyValue' -Type Text -AddToDefaultView
     #Set-View -List $ListName -Fields UrgencyValue -IsDefault
     Invoke-PnPQuery -Connection $Connection
     #If($LoadSecondaryData.IsPresent) {
@@ -900,7 +852,34 @@ Function New-UrgencyValues($ListName, $ListUrl, $Connection)
     #}
 }
 
-
+Function New-NatureOfRequestList($ListName, $ListUrl, $Connection)
+{
+    If (-not (IsListBuildRequired $ListName)) {
+        return;
+    }
+    If($null -ne (Get-PnPList -Identity $ListName -ErrorAction SilentlyContinue)){
+        Remove-PnPList -Force -Identity $ListName -Connection $Connection
+    }
+    New-PnPList -Title $ListName -Url $ListUrl -Template GenericList -Connection $connection
+    Set-PnPField -List $ListUrl -Identity Title -Values @{ Title = "Old_Title"; Required = $false;}
+    Add-PnPField -List $ListName -InternalName 'NatureOfRequest' -DisplayName 'NatureOfRequest' -Type Text -AddToDefaultView
+    #Set-View -List $ListName -Fields NatureOfRequest -IsDefault
+    Invoke-PnPQuery -Connection $Connection
+    #If($LoadSecondaryData.IsPresent) {                            
+        If ($null -ne ($dataNatureOfRequests = Get-Item -Path "$CsvPath/NatureOfRequest.csv" -ErrorAction SilentlyContinue)) {
+            $NatureOfRequests = Import-Csv -Path $dataNatureOfRequests
+            Write-Host -NoNewLine "Loading $ListName "
+            ForEach($NatureOfRequest in $NatureOfRequests) {
+                Add-PnPListItem -List $ListName -Values @{"NatureOfRequest" = $NatureOfRequest.NatureOfRequest} | Out-Null
+                Write-Host -NoNewline "."
+            }
+            Write-Host "`n"
+        }
+        else {
+            Write-Warning "CSV file can't be loaded for $ListName"
+        }
+    #}
+}
 
 Function Set-BooleanField($value) {
     if ($null -eq $value) {
@@ -981,8 +960,18 @@ Try {
 	New-SecondmentReasons -ListName $listNameSecondmentReasons  -ListUrl $listUrlSecondmentReasons -Connection $connection
 	New-ShopBandsList -ListName $listNameShopBands -ListUrl $listUrlShopBands -Connection $connection
 #>
+
+New-FrontDoorList -ListName $listNameAuthorisations -ListUrl $listUrlAuthorisations -Connection $connection
+   New-NatureOfRequestList -ListName $listNameNatureOfRequest -ListUrl $listUrlNatureOfRequest -Connection $connection
+   
+   
+#   $listNameNatureOfRequest = "NatureOfRequest"
+#$listUrlNatureOfRequest = "Lists/NatureOfRequest"
+
+
+
 New-LimitValuesList -ListName $listNameLimitValues  -ListUrl $listUrlLimitValues -Connection $connection
-    New-FrontDoorList -ListName $listNameAuthorisations -ListUrl $listUrlAuthorisations -Connection $connection
+    
  New-DesiredOutcomeList -ListName $listNameDesiredOutcome -ListUrl $listUrlDesiredOutcome -Connection $connection
     New-AreaOfImpactList -ListName $listNameAreaOfImpact -ListUrl $listUrlAreaOfImpact -Connection $connection
     New-DivisionList -ListName $listNameDivision -ListUrl $listUrlDivision -Connection $connection
