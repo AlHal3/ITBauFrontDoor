@@ -680,7 +680,7 @@ Add-PnPField -List $ListName -InternalName 'TestingSignoff' -DisplayName 'Testin
     Add-PnPField -List $ListName -Type Text -AddToDefaultView -InternalName 'IsThisARegulatoryRequirement' -DisplayName 'IsThisARegulatoryRequirement'  -Required
 	
 	Add-PnPField -List $ListName -InternalName 'DesiredOutcome' -DisplayName 'DesiredOutcome' -Type Text -AddToDefaultView -Required
-Add-PnPField -List $ListName -InternalName 'Urgency' -DisplayName 'Urgency' -Type Text -AddToDefaultView -Required
+    Add-PnPField -List $ListName -InternalName 'Urgency' -DisplayName 'Urgency' -Type Text -AddToDefaultView -Required 
    Add-PnPField -List $ListName -InternalName  'Risks' -DisplayName 'Risks' -Type Note -AddToDefaultView -Required 
     
 
